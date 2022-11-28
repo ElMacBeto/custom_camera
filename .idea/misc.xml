@@ -3,6 +3,12 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/humacias/Desktop/course/Camera/app/src/main/res/drawable/bg_btn.xml" value="0.1165" />
+        <entry key="..\:/Users/humacias/Desktop/course/Camera/app/src/main/res/drawable/foreground_item.xml" value="0.153" />
+        <entry key="..\:/Users/humacias/Desktop/course/Camera/app/src/main/res/layout/activity_bottom_sheets.xml" value="0.2" />
+        <entry key="..\:/Users/humacias/Desktop/course/Camera/app/src/main/res/layout/activity_camera.xml" value="0.20416666666666666" />
+        <entry key="..\:/Users/humacias/Desktop/course/Camera/app/src/main/res/layout/activity_main.xml" value="0.20416666666666666" />
+        <entry key="..\:/Users/humacias/Desktop/course/Camera/app/src/main/res/layout/modal_bottom_sheet_content.xml" value="0.22" />
         <entry key="..\:/Users/humacias/Desktop/course/app/src/main/res/drawable-v24/ic_back.xml" value="0.153" />
         <entry key="..\:/Users/humacias/Desktop/course/app/src/main/res/drawable-v24/ic_flip_camera.xml" value="0.153" />
         <entry key="..\:/Users/humacias/Desktop/course/app/src/main/res/drawable-v24/ic_save.xml" value="0.153" />

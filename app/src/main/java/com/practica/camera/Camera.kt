@@ -3,6 +3,7 @@ package com.practica.camera
 import android.Manifest
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.Uri
 import android.os.Bundle
@@ -13,12 +14,14 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewTreeObserver
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.practica.camera.databinding.ActivityCameraBinding
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -40,6 +43,8 @@ class Camera : AppCompatActivity() {
     private var cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
     private var data=""
     private var flashFlap = false
+    private lateinit var bitmapToSave: Bitmap
+    private val viewModel:CameraViewModel by viewModels()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,6 +56,7 @@ class Camera : AppCompatActivity() {
         data = intent.getStringExtra(INTENTARIO_NAME)!!
         checkPremisos()
         setListeners()
+        viewModel.changeStatusVisibility(true)
     }
 
     private fun checkPremisos(){
@@ -145,8 +151,6 @@ class Camera : AppCompatActivity() {
     }
 
     private fun setListeners(){
-        // set on click listener for the button of capture photo
-        // it calls a method which is implemented below
         binding.cameraCaptureButton.setOnClickListener { takePhoto() }
         binding.flipCamera.setOnClickListener{ flipCamera() }
         binding.backBtn.setOnClickListener{ takeAgainPhoto()}
@@ -169,7 +173,6 @@ class Camera : AppCompatActivity() {
             outputDirectory,
             SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis()) + ".jpg"
         )
-
         path = photoFile.absolutePath
 
         // Create output options object which contains file + metadata
@@ -178,6 +181,7 @@ class Camera : AppCompatActivity() {
         // Set up image capture listener,
         // which is triggered after photo has
         // been taken
+
         imageCapture.takePicture(
             outputOptions,//outputOptions
             ContextCompat.getMainExecutor(this),// ContextCompat.getMainExecutor(this)
@@ -187,8 +191,12 @@ class Camera : AppCompatActivity() {
                 }
                 //code after take the photo
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+
                     val savedUri = Uri.fromFile(photoFile)
+                    bitmapToSave= BitmapFactory.decodeFile(savedUri.path)
                     setVisibility(savedUri)
+//                    viewModel.changeStatusVisibility(false)
+                    viewModel.changeStatusVisibility(true)
                     // set the saved uri to the image view
                     val msg = "Photo capture succeeded: $savedUri"
                     Log.d(TAG, msg)
@@ -215,10 +223,18 @@ class Camera : AppCompatActivity() {
             if (image.exists()) image.delete()
         }
         setVisibility()
+        viewModel.changeStatusVisibility(true)
     }
 
     private fun saveImage(){
         isSave = true
+        val bos = ByteArrayOutputStream()
+        val image = File(path)
+        if (image.exists()){
+            bitmapToSave.compress(Bitmap.CompressFormat.JPEG, 100, bos)
+            val bArray = bos.toByteArray()
+            image.writeBytes(bArray)
+        }
 //        if(path!=""){
 //            val returnIntent = Intent()
 //            returnIntent.putExtra("path", path)
@@ -240,7 +256,7 @@ class Camera : AppCompatActivity() {
                 binding.flipCamera.visibility= View.GONE
                 binding.backBtn.visibility = View.VISIBLE
                 binding.saveBtn.visibility= View.VISIBLE
-                binding.flashBtn.visibility=View.GONE
+//                binding.flashBtn.visibility=View.GONE
                 binding.logo.visibility=View.GONE
                 binding.bgLogo.visibility=View.GONE
                 binding.rotarBtn.visibility= View.VISIBLE
@@ -253,7 +269,7 @@ class Camera : AppCompatActivity() {
                 binding.flipCamera.visibility= View.VISIBLE
                 binding.backBtn.visibility = View.GONE
                 binding.saveBtn.visibility= View.GONE
-                binding.flashBtn.visibility=View.VISIBLE
+//                binding.flashBtn.visibility=View.VISIBLE
                 binding.logo.visibility=View.VISIBLE
                 binding.bgLogo.visibility=View.VISIBLE
                 binding.rotarBtn.visibility= View.GONE
@@ -262,10 +278,13 @@ class Camera : AppCompatActivity() {
     }
 
     private fun rotateImage(){
-
-        
+        val image = File(path)
+        if (image.exists()){
+            val rotatedBitmap = CameraUtil().rotateImage(bitmapToSave)
+            bitmapToSave = rotatedBitmap
+            binding.ivCapture.setImageBitmap(bitmapToSave)
+        }
     }
-
 
     private inline fun View.afterMeasured(crossinline block: () -> Unit) {
         if (measuredWidth > 0 && measuredHeight > 0) {
